@@ -8,6 +8,8 @@ the free Portalgraph Runtime before opening or building the Portalgraph scenes:
 
 https://portalgraph.booth.pm/items/6256749
 
+https://portalgraph.itch.io/portalgraph-personal
+
 ROM images and game-specific profile files are not included. Use only ROM data
 that you are legally entitled to use. See `PortalNES_Manual.txt` for controls,
 supported mappers, and profile editing instructions.
@@ -31,6 +33,8 @@ Portalgraph用シーンを開く・ビルドする前に、無料のPortalgraph 
 インストールしてください。
 
 https://portalgraph.booth.pm/items/6256749
+
+https://portalgraph.itch.io/portalgraph-personal
 
 ROMイメージおよびゲーム固有のプロファイルは同梱していません。
 利用する権利のあるROMデータだけを使用してください。操作方法、対応マッパー、
