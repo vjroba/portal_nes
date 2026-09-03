@@ -1,0 +1,1 @@
+{"name":"PortalNes.Emulator.Tests","rootNamespace":"PortalNes.Tests","references":["PortalNes.Emulator"],"includePlatforms":["Editor"],"optionalUnityReferences":["TestAssemblies"],"autoReferenced":false}

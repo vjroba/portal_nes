@@ -1,0 +1,1 @@
+{"name":"PortalNes.UnityBridge","rootNamespace":"PortalNes.UnityBridge","references":["PortalNes.Emulator","PortalNes.Rendering3D","Unity.InputSystem"],"autoReferenced":true}

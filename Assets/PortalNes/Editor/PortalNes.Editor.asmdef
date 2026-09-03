@@ -1,0 +1,1 @@
+{"name":"PortalNes.Editor","rootNamespace":"PortalNes.Editor","references":["PortalNes.Emulator","PortalNes.UnityBridge","PortalNes.Rendering3D"],"includePlatforms":["Editor"],"autoReferenced":true}

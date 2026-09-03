@@ -1,0 +1,52 @@
+# Unity generated directories
+/[Ll]ibrary/
+/[Tt]emp/
+/[Oo]bj/
+/[Bb]uild/
+/[Bb]uilds/
+/[Ll]ogs/
+/[Uu]ser[Ss]ettings/
+/[Mm]emoryCaptures/
+/[Pp]rofilerCaptures/
+/[Rr]ecordings/
+
+# IDE and generated project files
+/.vs/
+/.vscode/
+*.csproj
+*.sln
+*.slnx
+*.user
+*.userprefs
+*.pidb
+*.booproj
+*.svd
+*.pdb
+*.mdb
+*.opendb
+*.VC.db
+
+# OS files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Local Codex/agent state
+/.codex/
+/.agents/
+
+# Portalgraph SDK is distributed separately and must never be committed here
+/Assets/Portalgraph/
+/Assets/Portalgraph.meta
+
+# ROMs and emulator-local artifacts must never be committed
+*.nes
+*.fds
+*.unf
+*.unif
+*.sav
+*.nesprof
+
+# Unity crash and diagnostic artifacts
+sysinfo.txt
+crashlytics-build.properties

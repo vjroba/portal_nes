@@ -1,0 +1,348 @@
+PortalNES 同梱マニュアル
+========================
+
+1. PortalNESについて
+--------------------
+
+PortalNESは、ファミリーコンピュータ/NESの背景タイルとスプライトを
+リアルタイムに立体化し、Portalgraphで多視点表示する実験的なエミュレーターです。
+
+ROMデータは本アプリケーションに付属していません。
+利用者自身が正当に使用できるROMファイルを用意してください。
+
+
+2. 必要なランタイム
+--------------------
+
+PortalNESの実行前に「Portalgraph Runtime」をインストールしてください。
+
+Portalgraph Runtime（無料）
+https://portalgraph.booth.pm/items/6256749
+
+カメラトラッキングが動作しない場合は、Microsoft Visual C++ 再頒布可能
+パッケージの最新版もインストールしてください。
+
+Microsoft Visual C++ Redistributable
+https://learn.microsoft.com/ja-jp/cpp/windows/latest-supported-vc-redist
+
+
+3. 起動とROMの読み込み
+----------------------
+
+1. Portalgraph Runtimeをインストールします。
+2. PortalNESを起動します。
+3. F1キーを押します。
+4. ファイル選択画面から拡張子「.nes」のROMを選択します。
+
+未対応Mapperや破損したROMは読み込めません。
+エラー画面が表示された場合は、F1キーを押して別のROMを選択してください。
+
+
+4. 立体化プロファイル
+----------------------
+
+ROMと同じフォルダーに、ROMと同名の立体化プロファイルが保存されます。
+
+例：
+  Game.nes
+  Game.nesprof
+
+対応する「.nesprof」が存在しない場合は、ROM読み込み時に自動作成されます。
+プロファイルには、背景タイルやスプライトのDepth、厚み、形状などが保存されます。
+
+プロファイルはROMデータを含みません。
+ただし、プロファイルの公開・共有は利用者自身の責任で行ってください。
+
+
+5. PortalNESの操作
+-------------------
+
+F1        ROMを読み込む
+F2        Portalgraph背景の表示/非表示を切り替える
+F3        タイル設定画面を表示する
+F5        現在のゲームをリセットする
+F6        セーブステートを保存する
+F7        セーブステートを読み込む
+
+
+6. NESコントローラー
+---------------------
+
+カーソルキー    十字キー
+J               Aボタン
+K               Bボタン
+U               連射Aボタン
+L               連射Bボタン
+Enter           START
+右Shift         SELECT
+
+従来の割り当てとして、Z/X、C/V、U/I、Backspaceも使用できます。
+
+Xboxコントローラー：
+  方向パッド             十字キー
+  Bボタン（右）          Aボタン
+  Aボタン（下）          Bボタン
+  Yボタン（上）          連射Aボタン
+  Xボタン（左）          連射Bボタン
+  Menuボタン             START
+  Viewボタン             SELECT
+
+
+7. Portalgraph表示の操作
+------------------------
+
+W / A / S / D / R / F    移動
+Q / E                    回転
+T / G                    回転
+Z / C                    回転
+1 / 2                    拡大・縮小
+3                        位置・回転・拡大率をリセット
+F12                      Portalgraph設定画面を表示
+
+
+8. タイル設定画面
+------------------
+
+F3キーで立体化プロファイルの編集画面を開きます。
+編集中はゲームが一時停止します。もう一度F3キー、またはEscキーで閉じます。
+
+Defaults：
+  個別ルールに一致しない背景とスプライトの標準設定を編集します。
+
+Background：
+  実際のゲーム画面を見ながら背景タイルを選択します。
+
+Sprites：
+  実際のゲーム画面を見ながらスプライトを選択します。
+
+CHR Tiles：
+  ROMまたは現在のCHRバンクに含まれるタイル一覧から選択します。
+
+主な形状：
+  Flat             平面
+  Box              箱
+  Beveled Box      面取りした箱
+  Cylinder         円柱
+  Pixel Extrusion  不透明ピクセル形状の押し出し
+
+複数のタイルはドラッグで選択できます。
+Ctrlキーを押しながらクリック/ドラッグすると、選択を追加または解除できます。
+
+
+9. 対応状況と注意事項
+----------------------
+
+現在対応しているMapper：
+  Mapper 0、1、2、3、4、5、7、9、10、
+  18、19、21、22、23、24、25、26、32、33、48、
+  65、66、67、68、69、70、71、72、73、75、76、78、80、
+  85、86、87、88、89、93、95、97、
+  140、154、184、206、210
+
+Mapper 5（Nintendo MMC5）、19（Namco N163）、24/26（Konami VRC6）、
+69（Sunsoft 5B）、85（Konami VRC7）の拡張音源にも対応しています。
+
+同じMapperを使用していても、特殊なCPU命令、PPUタイミング、音源処理、
+カートリッジ固有機能などにより正常に動作しないゲームがあります。
+
+PortalNESは実験的なアプリケーションです。
+すべてのファミリーコンピュータ/NESソフトの動作を保証するものではありません。
+
+
+10. トラブルシューティング
+---------------------------
+
+ROMが読み込めない：
+  画面に表示されたMapper番号やエラー内容を確認してください。
+  F1キーで別のROMを選択できます。
+
+カメラトラッキングが動かない：
+  Portalgraph Runtimeがインストールされているか確認してください。
+  改善しない場合はMicrosoft Visual C++ 再頒布可能パッケージを更新してください。
+
+表示が重い：
+  Pixel Extrusionを大量に使用するプロファイルはGPU負荷が高くなる場合があります。
+  タイル設定をFlatまたはBoxへ変更すると軽くなることがあります。
+
+立体化設定を最初から作り直したい：
+  ROMと同じ場所にある同名の「.nesprof」を退避または削除してから、
+  ROMを読み込み直してください。新しいプロファイルが自動作成されます。
+
+
+
+PortalNES Bundled Manual — English
+==================================
+
+1. About PortalNES
+------------------
+
+PortalNES is an experimental Nintendo Entertainment System/Famicom emulator
+that converts background tiles and sprites into 3D in real time and displays
+them from multiple viewpoints on Portalgraph.
+
+No ROM data is included with this application.
+You must provide ROM files that you are legally entitled to use.
+
+
+2. Required Runtime
+-------------------
+
+Install Portalgraph Runtime before starting PortalNES.
+
+Portalgraph Runtime (free)
+https://portalgraph.booth.pm/items/6256749
+
+If camera tracking does not work, install the latest Microsoft Visual C++
+Redistributable as well.
+
+Microsoft Visual C++ Redistributable
+https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist
+
+
+3. Starting PortalNES and Loading a ROM
+---------------------------------------
+
+1. Install Portalgraph Runtime.
+2. Start PortalNES.
+3. Press F1.
+4. Select a ROM with the ".nes" extension in the file dialog.
+
+ROMs that use unsupported mappers, as well as invalid or damaged ROM files,
+cannot be loaded. If an error appears, press F1 and select another ROM.
+
+
+4. 3D Rendering Profiles
+------------------------
+
+A 3D rendering profile with the same base filename as the ROM is stored in
+the same folder.
+
+Example:
+  Game.nes
+  Game.nesprof
+
+If the corresponding ".nesprof" file does not exist, PortalNES creates it
+automatically when the ROM is loaded.
+
+The profile stores settings such as Depth, thickness and geometry for
+background tiles and sprites.
+
+Profile files do not contain ROM data. However, you are responsible for any
+profile files that you publish or share.
+
+
+5. PortalNES Controls
+---------------------
+
+F1        Load a ROM
+F2        Toggle the Portalgraph backdrop
+F3        Open the tile/profile editor
+F5        Reset the current game
+F6        Save state
+F7        Load state
+
+
+6. NES Controller
+-----------------
+
+Arrow keys      D-pad
+J               A button
+K               B button
+U               Turbo A
+L               Turbo B
+Enter           START
+Right Shift     SELECT
+
+The legacy Z/X, C/V, U/I and Backspace bindings are also available.
+
+Xbox controller:
+  D-pad                  NES D-pad
+  B button (right)       NES A
+  A button (bottom)      NES B
+  Y button (top)         Turbo A
+  X button (left)        Turbo B
+  Menu button            START
+  View button            SELECT
+
+
+7. Portalgraph View Controls
+----------------------------
+
+W / A / S / D / R / F    Move
+Q / E                    Rotate
+T / G                    Rotate
+Z / C                    Rotate
+1 / 2                    Scale up/down
+3                        Reset position, rotation and scale
+F12                      Open Portalgraph settings
+
+
+8. Tile/Profile Editor
+----------------------
+
+Press F3 to open the 3D rendering profile editor.
+The game is paused while editing. Press F3 again, or press Esc, to close it.
+
+Defaults:
+  Edit the default settings used by backgrounds and sprites that do not match
+  an individual rule.
+
+Background:
+  Select background tiles while viewing the current game screen.
+
+Sprites:
+  Select sprites while viewing the current game screen.
+
+CHR Tiles:
+  Select from the tiles in the ROM or in the currently selected CHR bank.
+
+Available geometry types:
+  Flat             Flat surface
+  Box              Box
+  Beveled Box      Beveled box
+  Cylinder         Cylinder
+  Pixel Extrusion  Extrudes the opaque pixel shape
+
+Drag to select multiple tiles.
+Hold Ctrl while clicking or dragging to add or remove tiles from the selection.
+
+
+9. Compatibility and Important Notes
+------------------------------------
+
+Currently supported mappers:
+  Mapper 0, 1, 2, 3, 4, 5, 7, 9, 10,
+  18, 19, 21, 22, 23, 24, 25, 26, 32, 33, 48,
+  65, 66, 67, 68, 69, 70, 71, 72, 73, 75, 76, 78, 80,
+  85, 86, 87, 88, 89, 93, 95, 97,
+  140, 154, 184, 206 and 210
+
+Expansion audio is also supported for Mapper 5 (Nintendo MMC5),
+19 (Namco N163),
+24/26 (Konami VRC6), 69 (Sunsoft 5B) and 85 (Konami VRC7).
+
+Games using a supported mapper may still fail because of special CPU
+instructions, PPU timing, audio behavior or cartridge-specific features.
+
+PortalNES is experimental software.
+Compatibility with every NES/Famicom game is not guaranteed.
+
+
+10. Troubleshooting
+-------------------
+
+A ROM cannot be loaded:
+  Check the mapper number or error message shown on screen.
+  Press F1 to select another ROM.
+
+Camera tracking does not work:
+  Confirm that Portalgraph Runtime is installed.
+  If the problem continues, update the Microsoft Visual C++ Redistributable.
+
+Performance is low:
+  Profiles that use Pixel Extrusion on many tiles may increase GPU load.
+  Changing some tiles to Flat or Box geometry may improve performance.
+
+Start the 3D profile again from scratch:
+  Move or delete the matching ".nesprof" file next to the ROM, then load the
+  ROM again. PortalNES will create a new profile automatically.

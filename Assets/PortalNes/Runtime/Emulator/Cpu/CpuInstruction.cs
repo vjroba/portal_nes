@@ -1,0 +1,1 @@
+namespace PortalNes.Emulator.Cpu { public readonly struct CpuInstruction { public readonly byte Opcode; public readonly string Mnemonic; public CpuInstruction(byte opcode, string mnemonic) { Opcode = opcode; Mnemonic = mnemonic; } } }
