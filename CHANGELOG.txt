@@ -4,13 +4,8 @@ PortalNES 更新履歴
 Version 0.8
 -----------
 
-- 通常のUnityカメラで立体表示を確認できる3Dシーンを追加しました。
-- 3Dシーンのカメラ背景色を、ゲームの背景色へリアルタイムに同期するようにしました。
-- 視点操作用のTransformMouseControllerをInput Systemに対応させました。
-- 数字キーの1と2で、3DカメラのFOVを調整できるようにしました。
 - ROM選択画面、F3プロファイル編集画面、Portalgraph設定画面以外では、
   マウスカーソルを自動的に非表示にするようにしました。
-- Portalgraph SDKを含まない形でソースコードを公開できる構成を用意しました。
 - VBlank境界でPPUSTATUSを読み出した際、VBlankとNMIが二重に観測される
   タイミング問題を修正しました。
 - スプライトのPixel Extrusionでも、Color 1～3を押し出さずに残す設定が
@@ -18,8 +13,7 @@ Version 0.8
 - スプライトのBox設定では効果のないSurface Unit入力欄を非表示にしました。
 - F3画面の数値入力欄へ入力できる文字を、整数または小数として有効な文字に
   制限しました。
-- F3画面の入力欄へフォーカスしている間は、TransformScaleControllerと
-  TransformMouseControllerによるシーン操作を一時停止するようにしました。
+- F3画面の入力欄へフォーカスしている間は、数字キーによる操作を無効にしました。
 
 
 Version 0.7
