@@ -89,7 +89,8 @@ namespace PortalNes.Editor
             ruleUseBox = ruleGeometry == NesGeometryType.Box;
             using (new EditorGUI.DisabledScope(ruleGeometry == NesGeometryType.Flat))
                 ruleThickness = EditorGUILayout.FloatField("Thickness", ruleThickness);
-            if (ruleGeometry == NesGeometryType.Box)
+            if (ruleGeometry == NesGeometryType.Box &&
+                pickerElementType == NesElementType.Background)
             {
                 ruleSurfaceUnitWidth = EditorGUILayout.IntSlider("Surface Unit Width", ruleSurfaceUnitWidth, 1, 8);
                 ruleSurfaceUnitHeight = EditorGUILayout.IntSlider("Surface Unit Height", ruleSurfaceUnitHeight, 1, 8);

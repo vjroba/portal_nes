@@ -810,24 +810,32 @@ namespace PortalNes.Rendering3D
                 {
                     float thickness = rule != null && rule.Thickness > 0
                         ? rule.Thickness : ResolveDefaultSpriteThickness();
-                    if (geometry == NesGeometryType.PixelExtrusion &&
+                    ulong upperMask = ApplyExcludedSpritePatternColors(
+                        snapshot.SpriteOpaqueMasks[i], rule, geometry,
+                        snapshot.SpriteColor1Masks[i], snapshot.SpriteColor2Masks[i],
+                        snapshot.SpriteColor3Masks[i]);
+                    if (upperMask != 0 && geometry == NesGeometryType.PixelExtrusion &&
                         CanInstancePixelExtrusion(rule, x, y))
                         QueuePixelExtrusion(spritePixelBatches, rule,
-                            snapshot.SpriteOpaqueMasks[i], x, y, depth * PixelsPerDepthUnit,
+                            upperMask, x, y, depth * PixelsPerDepthUnit,
                             thickness * PixelsPerDepthUnit, snapshot.SpritePixels);
-                    else
-                        PresentShapedSprite(rule, geometry, snapshot.SpriteOpaqueMasks[i], x, y,
+                    else if (upperMask != 0)
+                        PresentShapedSprite(rule, geometry, upperMask, x, y,
                             depth * PixelsPerDepthUnit, thickness, snapshot.SpritePixels);
                     if (snapshot.SpriteHeight == 16 && snapshot.SpriteLowerOpaqueMasks[i] != 0)
                     {
-                        if (geometry == NesGeometryType.PixelExtrusion &&
+                        ulong lowerMask = ApplyExcludedSpritePatternColors(
+                            snapshot.SpriteLowerOpaqueMasks[i], rule, geometry,
+                            snapshot.SpriteLowerColor1Masks[i], snapshot.SpriteLowerColor2Masks[i],
+                            snapshot.SpriteLowerColor3Masks[i]);
+                        if (lowerMask != 0 && geometry == NesGeometryType.PixelExtrusion &&
                             CanInstancePixelExtrusion(rule, x, y + 8))
                             QueuePixelExtrusion(spritePixelBatches, rule,
-                                snapshot.SpriteLowerOpaqueMasks[i], x, y + 8,
+                                lowerMask, x, y + 8,
                                 depth * PixelsPerDepthUnit, thickness * PixelsPerDepthUnit,
                                 snapshot.SpritePixels);
-                        else
-                            PresentShapedSprite(rule, geometry, snapshot.SpriteLowerOpaqueMasks[i], x, y + 8,
+                        else if (lowerMask != 0)
+                            PresentShapedSprite(rule, geometry, lowerMask, x, y + 8,
                                 depth * PixelsPerDepthUnit, thickness, snapshot.SpritePixels);
                     }
                 }
@@ -844,6 +852,17 @@ namespace PortalNes.Rendering3D
             return renderProfile != null && renderProfile.DefaultSpriteThickness > 0f
                 ? renderProfile.DefaultSpriteThickness
                 : automaticSpriteThickness;
+        }
+
+        private static ulong ApplyExcludedSpritePatternColors(ulong mask, NesRenderRule rule,
+            NesGeometryType geometry, ulong color1Mask, ulong color2Mask, ulong color3Mask)
+        {
+            if (geometry != NesGeometryType.PixelExtrusion || rule == null) return mask;
+            int excluded = rule.PixelExtrusionExcludedColorMask;
+            if ((excluded & (1 << 1)) != 0) mask &= ~color1Mask;
+            if ((excluded & (1 << 2)) != 0) mask &= ~color2Mask;
+            if ((excluded & (1 << 3)) != 0) mask &= ~color3Mask;
+            return mask;
         }
 
         private void PresentShapedSprite(NesRenderRule rule, NesGeometryType geometry, ulong opaqueMask,

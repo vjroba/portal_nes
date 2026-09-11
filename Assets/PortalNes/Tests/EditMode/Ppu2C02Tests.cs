@@ -145,6 +145,33 @@ namespace PortalNes.Tests
         }
 
         [Test]
+        public void StatusReadAtEndOfPostRenderScanlineSeesDeferredVblank()
+        {
+            ppu.CpuWriteRegister(0x2000, 0x80);
+            while (ppu.Scanline < 240 || ppu.Dot < 329) ppu.Clock();
+
+            byte status = ppu.CpuReadRegister(0x2002);
+            while (ppu.Scanline < 241 || ppu.Dot < 2) ppu.Clock();
+
+            Assert.That(status & 0x80, Is.Not.Zero,
+                "A CPU status read whose later bus cycle enters vblank must observe it.");
+            Assert.That(ppu.Registers.Status & 0x80, Is.Zero,
+                "The deferred vblank edge was already consumed by the status read.");
+            Assert.That(ppu.NmiRequested, Is.False,
+                "A consumed vblank edge must not generate a second NMI.");
+        }
+
+        [Test]
+        public void StatusReadBeforeDeferredVblankWindowDoesNotSeeVblank()
+        {
+            while (ppu.Scanline < 240 || ppu.Dot < 328) ppu.Clock();
+
+            byte status = ppu.CpuReadRegister(0x2002);
+
+            Assert.That(status & 0x80, Is.Zero);
+        }
+
+        [Test]
         public void SceneSnapshotTileHashChangesWithChrBank()
         {
             byte[] chr = new byte[16384];
@@ -181,6 +208,27 @@ namespace PortalNes.Tests
             int safety = 341 * 30;
             while ((ppu.Registers.Status & 0x40) == 0 && safety-- > 0) ppu.Clock();
             Assert.That(ppu.Registers.Status & 0x40, Is.Not.Zero);
+        }
+
+        [Test]
+        public void SceneSnapshot_CapturesSpritePatternColorMasks()
+        {
+            byte[] chr = new byte[8192];
+            chr[0] = 0xA0; // x=0 color 1, x=2 low bit of color 3.
+            chr[8] = 0x60; // x=1 color 2, x=2 high bit of color 3.
+            ppu = new Ppu2C02(new Mapper000(new byte[16384], chr), MirroringMode.Vertical);
+            ppu.CpuWriteRegister(0x2003, 0);
+            ppu.CpuWriteRegister(0x2004, 10);
+            ppu.CpuWriteRegister(0x2004, 0);
+            ppu.CpuWriteRegister(0x2004, 0);
+            ppu.CpuWriteRegister(0x2004, 20);
+
+            while (!ppu.FrameComplete) ppu.Clock();
+
+            Assert.That(ppu.SceneSnapshot.SpriteOpaqueMasks[0] & 0x07, Is.EqualTo(0x07));
+            Assert.That(ppu.SceneSnapshot.SpriteColor1Masks[0] & 0x07, Is.EqualTo(0x01));
+            Assert.That(ppu.SceneSnapshot.SpriteColor2Masks[0] & 0x07, Is.EqualTo(0x02));
+            Assert.That(ppu.SceneSnapshot.SpriteColor3Masks[0] & 0x07, Is.EqualTo(0x04));
         }
 
         [Test]

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Text;
 using PortalNes.Rendering3D;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -49,6 +50,10 @@ namespace PortalNes.UnityBridge
         private Texture2D chrAtlas;
         private GUISkin editorSkin;
         private Vector2 editorScroll;
+        private const string TextInputControlPrefix = "PortalNesTextInput";
+        private readonly List<MonoBehaviour> suspendedSceneKeyControllers = new List<MonoBehaviour>();
+        private int textInputControlIndex;
+        private bool textInputFocused;
 
         private byte selectedPattern;
         private byte selectedPalette;
@@ -78,6 +83,7 @@ namespace PortalNes.UnityBridge
         private NesGeometryType defaultBackgroundGeometry = NesGeometryType.Flat;
 
         public bool IsVisible => visible;
+        public bool IsTextInputFocused => visible && textInputFocused;
 
         public bool ContainsScreenPoint(Vector2 screenPoint)
         {
@@ -152,6 +158,8 @@ namespace PortalNes.UnityBridge
             }
             else
             {
+                SetSceneKeyControllersSuppressed(false);
+                textInputFocused = false;
                 if (runner != null) runner.EmulationPaused = previousPaused;
                 Cursor.visible = previousCursorVisible;
                 Cursor.lockState = previousCursorLock;
@@ -174,9 +182,83 @@ namespace PortalNes.UnityBridge
             if (!visible) return;
             EnsureEditorSkin();
             GUI.skin = editorSkin;
+            textInputControlIndex = 0;
             windowRect.width = Mathf.Max(680, Mathf.Min(1120, Screen.width - 32));
             windowRect.height = Mathf.Max(520, Mathf.Min(900, Screen.height - 32));
             windowRect = GUI.Window(GetInstanceID(), windowRect, DrawWindow, "PortalNes Runtime Profile Editor — F3/Esc to close");
+            string focusedControl = GUI.GetNameOfFocusedControl();
+            bool focused = !string.IsNullOrEmpty(focusedControl) &&
+                focusedControl.StartsWith(TextInputControlPrefix, StringComparison.Ordinal);
+            if (focused != textInputFocused)
+            {
+                textInputFocused = focused;
+                SetSceneKeyControllersSuppressed(focused);
+            }
+        }
+
+        private string DrawTextField(string value, params GUILayoutOption[] options)
+        {
+            GUI.SetNextControlName(TextInputControlPrefix + textInputControlIndex++);
+            return GUILayout.TextField(value, options);
+        }
+
+        private string DrawIntegerField(string value, params GUILayoutOption[] options)
+        {
+            return FilterNumericInput(DrawTextField(value, options), false);
+        }
+
+        private string DrawFloatField(string value, params GUILayoutOption[] options)
+        {
+            return FilterNumericInput(DrawTextField(value, options), true);
+        }
+
+        private static string FilterNumericInput(string value, bool allowDecimalPoint)
+        {
+            if (string.IsNullOrEmpty(value)) return value;
+            var filtered = new StringBuilder(value.Length);
+            bool hasDecimalPoint = false;
+            for (int i = 0; i < value.Length; i++)
+            {
+                char character = value[i];
+                if (character >= '0' && character <= '9')
+                    filtered.Append(character);
+                else if (character == '-' && filtered.Length == 0)
+                    filtered.Append(character);
+                else if (allowDecimalPoint && character == '.' && !hasDecimalPoint)
+                {
+                    filtered.Append(character);
+                    hasDecimalPoint = true;
+                }
+            }
+            return filtered.ToString();
+        }
+
+        private void SetSceneKeyControllersSuppressed(bool suppressed)
+        {
+            if (!suppressed)
+            {
+                for (int i = 0; i < suspendedSceneKeyControllers.Count; i++)
+                {
+                    MonoBehaviour controller = suspendedSceneKeyControllers[i];
+                    if (controller != null) controller.enabled = true;
+                }
+                suspendedSceneKeyControllers.Clear();
+                return;
+            }
+
+            if (suspendedSceneKeyControllers.Count != 0) return;
+            MonoBehaviour[] behaviours = FindObjectsByType<MonoBehaviour>(
+                FindObjectsInactive.Include, FindObjectsSortMode.None);
+            for (int i = 0; i < behaviours.Length; i++)
+            {
+                MonoBehaviour behaviour = behaviours[i];
+                if (behaviour == null || !behaviour.enabled) continue;
+                string typeName = behaviour.GetType().Name;
+                if (typeName != "TransformScaleController" &&
+                    typeName != "TransformMouseController") continue;
+                behaviour.enabled = false;
+                suspendedSceneKeyControllers.Add(behaviour);
+            }
         }
 
         private void EnsureEditorSkin()
@@ -335,7 +417,7 @@ namespace PortalNes.UnityBridge
                     GUILayout.Width(38));
                 string itemText = chrPreviewMode == ChrPreviewMode.Page1K
                     ? chrPreviewPageText : chrPreviewBankText;
-                itemText = GUILayout.TextField(itemText, GUILayout.Width(40));
+                itemText = DrawIntegerField(itemText, GUILayout.Width(40));
                 if (chrPreviewMode == ChrPreviewMode.Page1K) chrPreviewPageText = itemText;
                 else chrPreviewBankText = itemText;
                 if (GUILayout.Button("Go", GUILayout.Width(40)) &&
@@ -355,7 +437,8 @@ namespace PortalNes.UnityBridge
             GUILayout.EndHorizontal();
             GUILayout.BeginHorizontal();
             GUILayout.Label("Palette (-1=Any)", GUILayout.Width(110));
-            string paletteText = GUILayout.TextField(chrPalette.ToString(CultureInfo.InvariantCulture), GUILayout.Width(45));
+            string paletteText = DrawIntegerField(
+                chrPalette.ToString(CultureInfo.InvariantCulture), GUILayout.Width(45));
             if (int.TryParse(paletteText, out int parsedPalette)) chrPalette = Mathf.Clamp(parsedPalette, -1, 3);
             GUILayout.EndHorizontal();
             if (chrAtlas == null) BuildChrAtlas();
@@ -402,18 +485,18 @@ namespace PortalNes.UnityBridge
             }
             GUILayout.Label("Rule", GUI.skin.box);
             editorScroll = GUILayout.BeginScrollView(editorScroll);
-            GUILayout.Label("Name"); ruleName = GUILayout.TextField(ruleName);
-            GUILayout.Label("Depth"); depthText = GUILayout.TextField(depthText);
+            GUILayout.Label("Name"); ruleName = DrawTextField(ruleName);
+            GUILayout.Label("Depth"); depthText = DrawFloatField(depthText);
             GUILayout.Label("Geometry");
             geometry = DrawGeometrySelection(geometry);
             if (geometry != NesGeometryType.Flat)
             {
-                GUILayout.Label("Thickness"); thicknessText = GUILayout.TextField(thicknessText);
+                GUILayout.Label("Thickness"); thicknessText = DrawFloatField(thicknessText);
             }
-            if (geometry == NesGeometryType.Box)
+            if (geometry == NesGeometryType.Box && selectedElement == NesElementType.Background)
             {
-                GUILayout.Label("Surface Unit Width"); surfaceWidthText = GUILayout.TextField(surfaceWidthText);
-                GUILayout.Label("Surface Unit Height"); surfaceHeightText = GUILayout.TextField(surfaceHeightText);
+                GUILayout.Label("Surface Unit Width"); surfaceWidthText = DrawIntegerField(surfaceWidthText);
+                GUILayout.Label("Surface Unit Height"); surfaceHeightText = DrawIntegerField(surfaceHeightText);
             }
             if (geometry == NesGeometryType.PixelExtrusion)
             {
@@ -423,7 +506,7 @@ namespace PortalNes.UnityBridge
                         "Use Separate Rear / Base Depth");
                     GUI.enabled = usePixelBaseDepth;
                     GUILayout.Label("Rear / Base Depth");
-                    pixelBaseDepthText = GUILayout.TextField(pixelBaseDepthText);
+                    pixelBaseDepthText = DrawFloatField(pixelBaseDepthText);
                     GUI.enabled = true;
                 }
                 GUILayout.Label("Pattern Colors Left At Base");
@@ -455,13 +538,13 @@ namespace PortalNes.UnityBridge
         {
             GUILayout.Label("Default Sprite", GUI.skin.box);
             GUILayout.Label("Depth");
-            defaultSpriteDepthText = GUILayout.TextField(defaultSpriteDepthText);
+            defaultSpriteDepthText = DrawFloatField(defaultSpriteDepthText);
             GUILayout.Label("Geometry");
             defaultSpriteGeometry = DrawGeometrySelection(defaultSpriteGeometry);
             if (defaultSpriteGeometry != NesGeometryType.Flat)
             {
                 GUILayout.Label("Thickness");
-                defaultSpriteThicknessText = GUILayout.TextField(defaultSpriteThicknessText);
+                defaultSpriteThicknessText = DrawFloatField(defaultSpriteThicknessText);
             }
             GUI.enabled = renderer != null && renderer.RenderProfile != null;
             if (GUILayout.Button("Save Default Sprite Settings")) SaveDefaultSpriteSettings();
@@ -476,13 +559,13 @@ namespace PortalNes.UnityBridge
                 "Use Default Background Settings");
             GUI.enabled = useDefaultBackgroundSettings;
             GUILayout.Label("Depth");
-            defaultBackgroundDepthText = GUILayout.TextField(defaultBackgroundDepthText);
+            defaultBackgroundDepthText = DrawFloatField(defaultBackgroundDepthText);
             GUILayout.Label("Geometry");
             defaultBackgroundGeometry = DrawGeometrySelection(defaultBackgroundGeometry);
             if (defaultBackgroundGeometry != NesGeometryType.Flat)
             {
                 GUILayout.Label("Thickness");
-                defaultBackgroundThicknessText = GUILayout.TextField(defaultBackgroundThicknessText);
+                defaultBackgroundThicknessText = DrawFloatField(defaultBackgroundThicknessText);
             }
             GUI.enabled = renderer != null && renderer.RenderProfile != null &&
                 defaultBackgroundGeometry != NesGeometryType.CustomMesh;

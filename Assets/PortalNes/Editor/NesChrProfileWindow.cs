@@ -146,7 +146,7 @@ namespace PortalNes.Editor
             useBoxMesh = geometry == NesGeometryType.Box;
             using (new EditorGUI.DisabledScope(geometry == NesGeometryType.Flat))
                 thickness = EditorGUILayout.FloatField("Thickness", thickness);
-            if (geometry == NesGeometryType.Box)
+            if (geometry == NesGeometryType.Box && elementType == NesElementType.Background)
             {
                 surfaceUnitWidth = EditorGUILayout.IntSlider("Surface Unit Width", surfaceUnitWidth, 1, 8);
                 surfaceUnitHeight = EditorGUILayout.IntSlider("Surface Unit Height", surfaceUnitHeight, 1, 8);

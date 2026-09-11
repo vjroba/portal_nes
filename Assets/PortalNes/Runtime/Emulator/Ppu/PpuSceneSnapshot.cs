@@ -11,6 +11,12 @@ namespace PortalNes.Emulator.Ppu
         public uint[] SpritePixels { get; } = new uint[PpuFrameBuffer.Width * PpuFrameBuffer.Height];
         public ulong[] SpriteOpaqueMasks { get; } = new ulong[64];
         public ulong[] SpriteLowerOpaqueMasks { get; } = new ulong[64];
+        public ulong[] SpriteColor1Masks { get; } = new ulong[64];
+        public ulong[] SpriteColor2Masks { get; } = new ulong[64];
+        public ulong[] SpriteColor3Masks { get; } = new ulong[64];
+        public ulong[] SpriteLowerColor1Masks { get; } = new ulong[64];
+        public ulong[] SpriteLowerColor2Masks { get; } = new ulong[64];
+        public ulong[] SpriteLowerColor3Masks { get; } = new ulong[64];
         public uint[] SpriteTileHashes { get; } = new uint[64];
         public byte[] BackgroundPattern { get; } = new byte[PpuFrameBuffer.Width * PpuFrameBuffer.Height];
         public byte[] BackgroundPalette { get; } = new byte[PpuFrameBuffer.Width * PpuFrameBuffer.Height];

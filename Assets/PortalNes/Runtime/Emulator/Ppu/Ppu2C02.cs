@@ -12,6 +12,11 @@ namespace PortalNes.Emulator.Ppu
         // by one CPU write phase to keep raster handlers on the same side of the
         // dot-256 vertical increment as they are on hardware.
         private const int MapperScanlineClockDot = 268;
+        // CPU instructions are executed atomically and their PPU clocks are
+        // applied afterwards. An absolute $2002 read occurs near the end of
+        // its instruction on hardware, so a read begun in this small window
+        // already observes the vblank that those deferred clocks enter.
+        private const int CpuStatusReadVblankLookAheadDots = 12;
         private static readonly uint[] NesPalette =
         {
             C(84,84,84),C(0,30,116),C(8,16,144),C(48,0,136),C(68,0,100),C(92,0,48),C(84,4,0),C(60,24,0),C(32,42,0),C(8,58,0),C(0,64,0),C(0,60,0),C(0,50,60),C(0,0,0),C(0,0,0),C(0,0,0),
@@ -35,11 +40,18 @@ namespace PortalNes.Emulator.Ppu
         private readonly byte[] frameRenderedSpriteValid = new byte[64];
         private readonly ulong[] frameSpriteOpaqueMasks = new ulong[64];
         private readonly ulong[] frameSpriteLowerOpaqueMasks = new ulong[64];
+        private readonly ulong[] frameSpriteColor1Masks = new ulong[64];
+        private readonly ulong[] frameSpriteColor2Masks = new ulong[64];
+        private readonly ulong[] frameSpriteColor3Masks = new ulong[64];
+        private readonly ulong[] frameSpriteLowerColor1Masks = new ulong[64];
+        private readonly ulong[] frameSpriteLowerColor2Masks = new ulong[64];
+        private readonly ulong[] frameSpriteLowerColor3Masks = new ulong[64];
         private readonly uint[] frameSpriteTileHashes = new uint[64];
         private int frameSpriteHeight = 8;
         private ushort v, t;
         private byte fineX;
         private bool writeToggle;
+        private bool suppressNextVblank;
         private byte readBuffer;
         private byte openBus;
         private long frameNumber;
@@ -108,7 +120,8 @@ namespace PortalNes.Emulator.Ppu
 
         public void Reset()
         {
-            Registers = default; v = t = 0; fineX = readBuffer = openBus = 0; writeToggle = false;
+            Registers = default; v = t = 0; fineX = readBuffer = openBus = 0;
+            writeToggle = suppressNextVblank = false;
             Scanline = 0; Dot = 0; FrameComplete = NmiRequested = DelayNmiOneCpuInstruction = false; frameNumber = 0;
         }
 
@@ -174,11 +187,21 @@ namespace PortalNes.Emulator.Ppu
 
             if (Scanline == 241 && Dot == 1)
             {
-                var r = Registers; r.Status |= 0x80; Registers = r;
-                if ((Registers.Control & 0x80) != 0)
+                if (suppressNextVblank)
                 {
-                    NmiRequested = true;
-                    DelayNmiOneCpuInstruction = false;
+                    // A status read whose bus cycle lands on the vblank edge
+                    // both observes and clears that edge. Do not emit it a
+                    // second time when deferred PPU clocks catch up.
+                    suppressNextVblank = false;
+                }
+                else
+                {
+                    var r = Registers; r.Status |= 0x80; Registers = r;
+                    if ((Registers.Control & 0x80) != 0)
+                    {
+                        NmiRequested = true;
+                        DelayNmiOneCpuInstruction = false;
+                    }
                 }
             }
             else if (Scanline == preRenderScanline && Dot == 1)
@@ -214,6 +237,18 @@ namespace PortalNes.Emulator.Ppu
                 frameSpriteOpaqueMasks.Length);
             Array.Copy(frameSpriteLowerOpaqueMasks, SceneSnapshot.SpriteLowerOpaqueMasks,
                 frameSpriteLowerOpaqueMasks.Length);
+            Array.Copy(frameSpriteColor1Masks, SceneSnapshot.SpriteColor1Masks,
+                frameSpriteColor1Masks.Length);
+            Array.Copy(frameSpriteColor2Masks, SceneSnapshot.SpriteColor2Masks,
+                frameSpriteColor2Masks.Length);
+            Array.Copy(frameSpriteColor3Masks, SceneSnapshot.SpriteColor3Masks,
+                frameSpriteColor3Masks.Length);
+            Array.Copy(frameSpriteLowerColor1Masks, SceneSnapshot.SpriteLowerColor1Masks,
+                frameSpriteLowerColor1Masks.Length);
+            Array.Copy(frameSpriteLowerColor2Masks, SceneSnapshot.SpriteLowerColor2Masks,
+                frameSpriteLowerColor2Masks.Length);
+            Array.Copy(frameSpriteLowerColor3Masks, SceneSnapshot.SpriteLowerColor3Masks,
+                frameSpriteLowerColor3Masks.Length);
             Array.Copy(frameSpriteTileHashes, SceneSnapshot.SpriteTileHashes,
                 frameSpriteTileHashes.Length);
             SceneSnapshot.SpriteHeight = frameSpriteHeight;
@@ -245,7 +280,14 @@ namespace PortalNes.Emulator.Ppu
             switch (register)
             {
                 case 2:
-                    result = (byte)((Registers.Status & 0xE0) | (openBus & 0x1F));
+                    byte status = Registers.Status;
+                    if ((status & 0x80) == 0 && Scanline == 240 &&
+                        Dot >= 341 - CpuStatusReadVblankLookAheadDots)
+                    {
+                        status |= 0x80;
+                        suppressNextVblank = true;
+                    }
+                    result = (byte)((status & 0xE0) | (openBus & 0x1F));
                     var r = Registers; r.Status &= 0x7F; Registers = r; writeToggle = false;
                     break;
                 case 4: result = oam[Registers.OamAddress]; break;
@@ -565,6 +607,8 @@ namespace PortalNes.Emulator.Ppu
                 int tile = oam[o + 1], attr = oam[o + 2];
                 bool flipX = (attr & 0x40) != 0, flipY = (attr & 0x80) != 0;
                 ulong upperMask = 0, lowerMask = 0;
+                ulong upperColor1 = 0, upperColor2 = 0, upperColor3 = 0;
+                ulong lowerColor1 = 0, lowerColor2 = 0, lowerColor3 = 0;
                 for (int py = 0; py < spriteHeight; py++)
                 {
                     int row = flipY ? spriteHeight - 1 - py : py;
@@ -574,16 +618,36 @@ namespace PortalNes.Emulator.Ppu
                     for (int px = 0; px < 8; px++)
                     {
                         int bit = flipX ? px : 7 - px;
-                        if ((((lo >> bit) & 1) | (((hi >> bit) & 1) << 1)) != 0)
+                        int color = ((lo >> bit) & 1) | (((hi >> bit) & 1) << 1);
+                        if (color != 0)
                         {
                             int localY = py & 7;
-                            if (py < 8) upperMask |= 1UL << (localY * 8 + px);
-                            else lowerMask |= 1UL << (localY * 8 + px);
+                            ulong pixelBit = 1UL << (localY * 8 + px);
+                            if (py < 8)
+                            {
+                                upperMask |= pixelBit;
+                                if (color == 1) upperColor1 |= pixelBit;
+                                else if (color == 2) upperColor2 |= pixelBit;
+                                else upperColor3 |= pixelBit;
+                            }
+                            else
+                            {
+                                lowerMask |= pixelBit;
+                                if (color == 1) lowerColor1 |= pixelBit;
+                                else if (color == 2) lowerColor2 |= pixelBit;
+                                else lowerColor3 |= pixelBit;
+                            }
                         }
                     }
                 }
                 frameSpriteOpaqueMasks[i] = upperMask;
                 frameSpriteLowerOpaqueMasks[i] = lowerMask;
+                frameSpriteColor1Masks[i] = upperColor1;
+                frameSpriteColor2Masks[i] = upperColor2;
+                frameSpriteColor3Masks[i] = upperColor3;
+                frameSpriteLowerColor1Masks[i] = lowerColor1;
+                frameSpriteLowerColor2Masks[i] = lowerColor2;
+                frameSpriteLowerColor3Masks[i] = lowerColor3;
                 int firstDisplayedRow = flipY ? spriteHeight - 1 : 0;
                 frameSpriteTileHashes[i] = ComputeSpriteTileHash(
                     (ushort)(GetSpritePatternAddress(tile, firstDisplayedRow, spriteHeight) & 0xFFF0));

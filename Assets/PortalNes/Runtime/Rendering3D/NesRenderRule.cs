@@ -17,7 +17,7 @@ namespace PortalNes.Rendering3D
         [Tooltip("When enabled, Pattern Index is ignored and the rule follows matching CHR contents across bank slots. Requires Match Tile Hash.")]
         public bool MatchAnyPattern;
         public uint TileHash;
-        [Range(0, 14), Tooltip("For background Pixel Extrusion, pattern colors selected by bits 1-3 remain on the base layer instead of being extruded.")]
+        [Range(0, 14), Tooltip("For Pixel Extrusion, pattern colors selected by bits 1-3 remain on the flat/base layer instead of being extruded.")]
         public int PixelExtrusionExcludedColorMask;
         [Tooltip("For background Pixel Extrusion, place the non-extruded rear/base pixels at an explicit Depth independently of Thickness.")]
         public bool UsePixelExtrusionBaseDepth;
