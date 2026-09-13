@@ -16,6 +16,19 @@ ROM images and game-specific profile files are not included. Use only ROM data
 that you are legally entitled to use. See `PortalNES_Manual.txt` for controls,
 supported mappers, and profile editing instructions.
 
+## Quick start in Unity
+
+Open or create a Unity scene, then choose one of the following from the Unity
+menu:
+
+- `PortalNes > Create 2D Demo Rig` creates a configured NES runner, input
+  provider, texture renderer, and screen quad.
+- `PortalNes > Create 3D Demo Rig` creates a configured NES runner, input
+  provider, and 3D scene renderer.
+
+Enter Play Mode and press F1 to select a local ROM. Alternatively, set
+`Rom Path` in the `NesRunner` Inspector and enable `Load Rom On Start`.
+
 ## License
 
 The source code and original assets contained in this repository are available
@@ -42,6 +55,19 @@ https://portalgraph.itch.io/portalgraph-personal
 ROMイメージおよびゲーム固有のプロファイルは同梱していません。
 利用する権利のあるROMデータだけを使用してください。操作方法、対応マッパー、
 プロファイル編集については `PortalNES_Manual.txt` を参照してください。
+
+## Unityでの開始方法
+
+Unityでシーンを開くか新規作成し、メニューから次のいずれかを実行します。
+
+- `PortalNes > Create 2D Demo Rig`：設定済みのNESランナー、入力、
+  テクスチャ描画および画面用Quadを作成します。
+- `PortalNes > Create 3D Demo Rig`：設定済みのNESランナー、入力および
+  3Dシーンレンダラーを作成します。
+
+Play Modeに入り、F1でローカルのROMを選択してください。または、`NesRunner`の
+Inspectorで`Rom Path`を指定し、`Load Rom On Start`を有効にすると起動時に
+読み込めます。
 
 ## ライセンス
 
