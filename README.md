@@ -3,8 +3,10 @@
 PortalNES is an experimental NES emulator that converts NES backgrounds and
 sprites into a configurable 3D scene in Unity.
 
-The commercial **Portalgraph SDK is not included in this repository**. Get it
-here:
+The standalone 2D scene can be built and run without the Portalgraph SDK.
+
+The commercial **Portalgraph SDK is not included in this repository**. It is
+only required to use Portalgraph's multi-view 3D display features. Get it here:
 
 https://portalgraph.booth.pm/items/6256749
 
@@ -28,8 +30,10 @@ materials remain subject to their respective licenses and rights holders.
 PortalNESは、ファミコンの背景とスプライトを設定可能な3Dシーンへ変換する、
 Unity製の実験的なエミュレーターです。
 
+通常の2Dシーンは、Portalgraph SDKなしでビルド・実行できます。
+
 有償配布物である **Portalgraph SDKは、このリポジトリに含まれていません**。
-以下から入手してください。
+Portalgraphによる多視点3D表示を利用する場合のみ必要です。以下から入手できます。
 
 https://portalgraph.booth.pm/items/6256749
 
