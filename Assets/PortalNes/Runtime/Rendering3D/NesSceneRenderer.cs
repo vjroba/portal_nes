@@ -797,7 +797,9 @@ namespace PortalNes.Rendering3D
                 int right = Mathf.Min(256, x + 8), bottom = Mathf.Min(240, y + snapshot.SpriteHeight);
                 pickerSpriteRects[i] = new RectInt(Mathf.Max(0, x), Mathf.Max(0, y),
                     Mathf.Max(0, right - Mathf.Max(0, x)), Mathf.Max(0, bottom - Mathf.Max(0, y)));
-                pickerSpriteVisible[i] = visible && x < 256 && right > 0 && bottom > 0;
+                // Hidden sprites must remain selectable in the profile editor so their
+                // Hide rule can be changed or removed again.
+                pickerSpriteVisible[i] = y < 240 && x < 256 && right > 0 && bottom > 0;
                 NesGeometryType geometry = rule?.EffectiveGeometry ??
                     (renderProfile != null ? renderProfile.DefaultSpriteGeometry : NesGeometryType.PixelExtrusion);
                 bool shaped = geometry != NesGeometryType.Flat;
