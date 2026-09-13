@@ -29,6 +29,31 @@ menu:
 Enter Play Mode and press F1 to select a local ROM. Alternatively, set
 `Rom Path` in the `NesRunner` Inspector and enable `Load Rom On Start`.
 
+### Basic controls
+
+| Key | Function |
+| --- | --- |
+| F1 | Load ROM |
+| F2 | Toggle background color |
+| F3 | Open the 3D Profile Editor |
+| F5 | Reset |
+| F6 / Xbox LB | Quick Save |
+| F7 / Xbox RB | Quick Load |
+| F12 | Open Portalgraph settings (when using Portalgraph) |
+
+| Keyboard | NES control |
+| --- | --- |
+| Arrow keys | D-Pad |
+| J | A |
+| K | B |
+| U | Auto-fire A |
+| L | Auto-fire B |
+| Enter | START |
+| Right Shift | SELECT |
+
+Xbox controllers are also supported. See `PortalNES_Manual.txt` for the full
+controls and profile editing instructions.
+
 ## License
 
 The source code and original assets contained in this repository are available
@@ -68,6 +93,31 @@ Unityでシーンを開くか新規作成し、メニューから次のいずれ
 Play Modeに入り、F1でローカルのROMを選択してください。または、`NesRunner`の
 Inspectorで`Rom Path`を指定し、`Load Rom On Start`を有効にすると起動時に
 読み込めます。
+
+### 基本操作
+
+| キー | 機能 |
+| --- | --- |
+| F1 | ROMを読み込む |
+| F2 | 背景色の有無を切り替える |
+| F3 | 3Dプロファイル編集画面を開く |
+| F5 | リセット |
+| F6 / Xbox LB | クイックセーブ |
+| F7 / Xbox RB | クイックロード |
+| F12 | Portalgraph設定画面を開く（Portalgraph使用時） |
+
+| キーボード | ファミコンの操作 |
+| --- | --- |
+| カーソルキー | 十字キー |
+| J | Aボタン |
+| K | Bボタン |
+| U | Aボタン連射 |
+| L | Bボタン連射 |
+| Enter | STARTボタン |
+| 右Shift | SELECTボタン |
+
+Xboxコントローラーにも対応しています。すべての操作方法とプロファイル編集方法は
+`PortalNES_Manual.txt`を参照してください。
 
 ## ライセンス
 
