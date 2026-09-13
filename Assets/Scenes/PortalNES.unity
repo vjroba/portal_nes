@@ -222,17 +222,6 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 9096275307767100497, guid: d55be44c7c520874ea4e803389cee48f, type: 3}
   m_PrefabInstance: {fileID: 1183132100}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &74606690 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 9014738824030533365, guid: d55be44c7c520874ea4e803389cee48f, type: 3}
-  m_PrefabInstance: {fileID: 1183132100}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 74606687}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: -1798165749, guid: c5b6d4c13d7cb424487eb60690cb1dfd, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &74606693
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -245,7 +234,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f5eb20ed4132a1640bb194a937094b80, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PortalgraphBGChanger
-  portalgraph: {fileID: 74606690}
+  targetCameras:
+  - {fileID: 1183132105}
+  - {fileID: 1183132104}
+  - {fileID: 1183132103}
   nesSceneRenderer: {fileID: 37075763}
   useNesSceneRendererBackdropColor: 1
 --- !u!1 &330585543
@@ -665,6 +657,21 @@ MonoBehaviour:
   mouseDeltaScale: 0.1
   resetKey: 43
   profileEditor: {fileID: 0}
+--- !u!20 &1183132103 stripped
+Camera:
+  m_CorrespondingSourceObject: {fileID: 1428437651099765160, guid: d55be44c7c520874ea4e803389cee48f, type: 3}
+  m_PrefabInstance: {fileID: 1183132100}
+  m_PrefabAsset: {fileID: 0}
+--- !u!20 &1183132104 stripped
+Camera:
+  m_CorrespondingSourceObject: {fileID: 3106906184646378806, guid: d55be44c7c520874ea4e803389cee48f, type: 3}
+  m_PrefabInstance: {fileID: 1183132100}
+  m_PrefabAsset: {fileID: 0}
+--- !u!20 &1183132105 stripped
+Camera:
+  m_CorrespondingSourceObject: {fileID: 3106906185246840453, guid: d55be44c7c520874ea4e803389cee48f, type: 3}
+  m_PrefabInstance: {fileID: 1183132100}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

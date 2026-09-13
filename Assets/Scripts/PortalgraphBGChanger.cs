@@ -1,12 +1,11 @@
 using System;
 using PortalNes.Rendering3D;
 using UnityEngine;
-using Portalgraph;
 using UnityEngine.InputSystem;
 
 public class PortalgraphBGChanger : MonoBehaviour
 {
-    public Portalgraph.Portalgraph portalgraph;
+    public Camera[] targetCameras = Array.Empty<Camera>();
 
     public NesSceneRenderer nesSceneRenderer;
 
@@ -14,7 +13,14 @@ public class PortalgraphBGChanger : MonoBehaviour
 
     void Awake()
     {
-        nesSceneRenderer.BackdropColorChanged += OnBackdropColorChanged;
+        if (nesSceneRenderer != null)
+            nesSceneRenderer.BackdropColorChanged += OnBackdropColorChanged;
+    }
+
+    void OnDestroy()
+    {
+        if (nesSceneRenderer != null)
+            nesSceneRenderer.BackdropColorChanged -= OnBackdropColorChanged;
     }
 
     private void OnBackdropColorChanged(Color32 color)
@@ -25,18 +31,18 @@ public class PortalgraphBGChanger : MonoBehaviour
 
     private void ChangeBGColor(Color32 color)
     {
-        foreach (ScreenController screen in portalgraph.Screens)
+        foreach (Camera targetCamera in targetCameras)
         {
-            screen.leftCamera.backgroundColor = color;
-            screen.rightCamera.backgroundColor = color;
-            screen.centerCamera.backgroundColor = color;
+            if (targetCamera != null)
+                targetCamera.backgroundColor = color;
         }
     }
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        ChangeBGColor(nesSceneRenderer.CurrentBackdropColor);
+        if (nesSceneRenderer != null)
+            ChangeBGColor(nesSceneRenderer.CurrentBackdropColor);
     }
 
     // Update is called once per frame
@@ -55,6 +61,9 @@ public class PortalgraphBGChanger : MonoBehaviour
     private void ToggleBackdropColor()
     {
         useNesSceneRendererBackdropColor = !useNesSceneRendererBackdropColor;
-        ChangeBGColor(useNesSceneRendererBackdropColor ? nesSceneRenderer.CurrentBackdropColor : Color.black);
+        Color32 color = useNesSceneRendererBackdropColor && nesSceneRenderer != null
+            ? nesSceneRenderer.CurrentBackdropColor
+            : Color.black;
+        ChangeBGColor(color);
     }
 }
